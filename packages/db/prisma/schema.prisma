@@ -1,0 +1,432 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum StatusEmpresa {
+  ATIVA
+  INATIVA
+  BLOQUEADA
+}
+
+enum StatusPlano {
+  ATIVO
+  INATIVO
+}
+
+enum StatusApolice {
+  EM_IMPLANTACAO
+  ATIVA
+  COM_PENDENCIA
+  INADIMPLENTE
+  SUSPENSA
+  ENCERRADA
+  CANCELADA
+}
+
+enum StatusBeneficiario {
+  PRE_CADASTRADO
+  AGUARDANDO_IMPLANTACAO
+  ATIVO
+  PENDENTE_DOCUMENTAL
+  EXCLUIDO
+  NEGADO
+}
+
+enum StatusGrupoFamiliar {
+  PRE_CADASTRO
+  AGUARDANDO_DOCUMENTACAO
+  EM_IMPLANTACAO
+  ATIVO
+  INADIMPLENTE
+  EM_CAIXA_DE_EMERGENCIA
+  CANCELADO
+  NEGADO
+  ENCERRADO
+}
+
+enum PapelNoGrupo {
+  TITULAR
+  DEPENDENTE
+}
+
+enum Sexo {
+  MASCULINO
+  FEMININO
+  OUTRO
+  NAO_INFORMADO
+}
+
+enum TipoCobranca {
+  MENSALIDADE
+  PRO_RATA
+  AJUSTE
+  RENEGOCIACAO
+}
+
+enum StatusCobranca {
+  PENDENTE
+  PAGO
+  VENCIDO
+  CANCELADO
+  RENEGOCIADO
+}
+
+enum TipoItemCobranca {
+  BENEFICIARIO
+  AJUSTE
+  PRO_RATA
+  DESCONTO
+  ACRESCIMO
+}
+
+enum StatusFaturaTecnica {
+  PENDENTE
+  PAGA
+  IMPLANTADA
+  DEVOLVIDA
+  REPASSADA
+  CANCELADA
+}
+
+enum TipoReferenciaFaturaTecnica {
+  GRUPO_FAMILIAR
+  BENEFICIARIO
+  OUTRO
+}
+
+enum NivelRisco {
+  BAIXO
+  MEDIO
+  ALTO
+  CRITICO
+}
+
+enum TipoMovimentoCaixa {
+  APORTE_INICIAL
+  USO_POR_INADIMPLENCIA
+  RETORNO_POR_PAGAMENTO
+  AJUSTE_MANUAL
+  REPASSE_AO_CORRETOR
+}
+
+model Empresa {
+  id                       String                 @id @default(cuid())
+  cnpj                     String                 @unique
+  razaoSocial              String                 @map("razao_social")
+  nomeFantasia             String?                @map("nome_fantasia")
+  nomeContatoPrincipal     String?                @map("nome_contato_principal")
+  telefoneContatoPrincipal String?                @map("telefone_contato_principal")
+  emailContatoPrincipal    String?                @map("email_contato_principal")
+  status                   StatusEmpresa
+  observacoes              String?
+  criadoEm                 DateTime               @default(now()) @map("criado_em")
+  atualizadoEm             DateTime               @updatedAt @map("atualizado_em")
+  apolices                 Apolice[]
+  vinculosBeneficiario     VinculoBeneficiario[]
+  cobrancas                Cobranca[]
+  faturasTecnicas          FaturaTecnica[]
+
+  @@map("empresas")
+}
+
+model Plano {
+  id                  String                @id @default(cuid())
+  nome                String
+  operadora           String
+  tipo                String
+  status              StatusPlano
+  observacoes         String?
+  criadoEm            DateTime              @default(now()) @map("criado_em")
+  atualizadoEm        DateTime              @updatedAt @map("atualizado_em")
+  apolices            Apolice[]
+  tabelasPlano        TabelaPlano[]
+  vinculosBeneficiario VinculoBeneficiario[]
+  faturasTecnicas     FaturaTecnica[]
+
+  @@map("planos")
+}
+
+model Apolice {
+  id                           String                 @id @default(cuid())
+  empresaId                    String                 @map("empresa_id")
+  planoId                      String                 @map("plano_id")
+  numeroApolice                String                 @unique @map("numero_apolice")
+  operadora                    String
+  vigenciaInicio               DateTime               @map("vigencia_inicio")
+  vigenciaFim                  DateTime               @map("vigencia_fim")
+  implantacaoEm                DateTime?              @map("implantacao_em")
+  diaVencimentoPadrao          Int                    @map("dia_vencimento_padrao")
+  status                       StatusApolice
+  percentualComissaoCorretor   Decimal?               @db.Decimal(5, 2) @map("percentual_comissao_corretor")
+  observacoes                  String?
+  criadoEm                     DateTime               @default(now()) @map("criado_em")
+  atualizadoEm                 DateTime               @updatedAt @map("atualizado_em")
+  empresa                      Empresa                @relation(fields: [empresaId], references: [id])
+  plano                        Plano                  @relation(fields: [planoId], references: [id])
+  gruposFamiliares             GrupoFamiliar[]
+  vinculosBeneficiario         VinculoBeneficiario[]
+  cobrancas                    Cobranca[]
+  faturasTecnicas              FaturaTecnica[]
+  caixaEmergencia              CaixaEmergencia?
+  movimentosCaixa              MovimentoCaixa[]
+
+  @@index([empresaId, status])
+  @@map("apolices")
+}
+
+model TabelaPlano {
+  id            String             @id @default(cuid())
+  planoId       String             @map("plano_id")
+  vigenciaInicio DateTime          @map("vigencia_inicio")
+  vigenciaFim   DateTime?          @map("vigencia_fim")
+  ativa         Boolean            @default(true)
+  observacoes   String?
+  criadoEm      DateTime           @default(now()) @map("criado_em")
+  atualizadoEm  DateTime           @updatedAt @map("atualizado_em")
+  plano         Plano              @relation(fields: [planoId], references: [id])
+  faixas        TabelaPlanoFaixa[]
+
+  @@index([planoId, ativa])
+  @@map("tabelas_plano")
+}
+
+model TabelaPlanoFaixa {
+  id             String      @id @default(cuid())
+  tabelaPlanoId  String      @map("tabela_plano_id")
+  idadeInicial   Int         @map("idade_inicial")
+  idadeFinal     Int         @map("idade_final")
+  valorCusto     Decimal     @db.Decimal(12, 2) @map("valor_custo")
+  criadoEm       DateTime    @default(now()) @map("criado_em")
+  atualizadoEm   DateTime    @updatedAt @map("atualizado_em")
+  tabelaPlano    TabelaPlano @relation(fields: [tabelaPlanoId], references: [id], onDelete: Cascade)
+
+  @@index([tabelaPlanoId, idadeInicial, idadeFinal])
+  @@map("tabela_plano_faixas")
+}
+
+model Beneficiario {
+  id                           String                  @id @default(cuid())
+  nomeCompleto                 String                  @map("nome_completo")
+  documento                    String
+  sexo                         Sexo                    @default(NAO_INFORMADO)
+  telefone                     String?
+  email                        String?
+  dataNascimento               DateTime                @map("data_nascimento")
+  status                       StatusBeneficiario
+  observacoes                  String?
+  criadoEm                     DateTime                @default(now()) @map("criado_em")
+  atualizadoEm                 DateTime                @updatedAt @map("atualizado_em")
+  gruposComoTitular            GrupoFamiliar[]         @relation("TitularGrupoFamiliar")
+  vinculos                     VinculoBeneficiario[]   @relation("BeneficiarioVinculo")
+  vinculosComoTitular          VinculoBeneficiario[]   @relation("TitularVinculo")
+  cobrancasComoTitular         Cobranca[]              @relation("TitularResponsavelCobranca")
+  itensCobranca                ItemCobranca[]
+  faturasTecnicasComoTitular   FaturaTecnica[]         @relation("TitularResponsavelFaturaTecnica")
+  faturasTecnicasBeneficiario  FaturaTecnica[]         @relation("BeneficiarioFaturaTecnica")
+  movimentosCaixa              MovimentoCaixa[]
+
+  @@index([documento])
+  @@map("beneficiarios")
+}
+
+model GrupoFamiliar {
+  id                     String                 @id @default(cuid())
+  apoliceId              String                 @map("apolice_id")
+  titularBeneficiarioId  String                 @map("titular_beneficiario_id")
+  status                 StatusGrupoFamiliar
+  competenciaEntrada     String                 @map("competencia_entrada")
+  competenciaSaida       String?                @map("competencia_saida")
+  observacoes            String?
+  criadoEm               DateTime               @default(now()) @map("criado_em")
+  atualizadoEm           DateTime               @updatedAt @map("atualizado_em")
+  apolice                Apolice                @relation(fields: [apoliceId], references: [id])
+  titularBeneficiario    Beneficiario           @relation("TitularGrupoFamiliar", fields: [titularBeneficiarioId], references: [id])
+  vinculos               VinculoBeneficiario[]
+  cobrancas              Cobranca[]
+  faturasTecnicas        FaturaTecnica[]
+  movimentosCaixa        MovimentoCaixa[]
+
+  @@index([apoliceId, status])
+  @@map("grupos_familiares")
+}
+
+model VinculoBeneficiario {
+  id                    String            @id @default(cuid())
+  beneficiarioId        String            @map("beneficiario_id")
+  empresaId             String            @map("empresa_id")
+  apoliceId             String            @map("apolice_id")
+  grupoFamiliarId       String            @map("grupo_familiar_id")
+  planoId               String            @map("plano_id")
+  titularBeneficiarioId String?           @map("titular_beneficiario_id")
+  papelNoGrupo          PapelNoGrupo      @map("papel_no_grupo")
+  parentescoComTitular  String?           @map("parentesco_com_titular")
+  taxaPercentual        Decimal           @db.Decimal(5, 2) @map("taxa_percentual")
+  competenciaInicial    String            @map("competencia_inicial")
+  competenciaFinal      String?           @map("competencia_final")
+  motivoTransicao       String?           @map("motivo_transicao")
+  ativo                 Boolean           @default(true)
+  criadoEm              DateTime          @default(now()) @map("criado_em")
+  atualizadoEm          DateTime          @updatedAt @map("atualizado_em")
+  beneficiario          Beneficiario      @relation("BeneficiarioVinculo", fields: [beneficiarioId], references: [id])
+  empresa               Empresa           @relation(fields: [empresaId], references: [id])
+  apolice               Apolice           @relation(fields: [apoliceId], references: [id])
+  grupoFamiliar         GrupoFamiliar     @relation(fields: [grupoFamiliarId], references: [id])
+  plano                 Plano             @relation(fields: [planoId], references: [id])
+  titularBeneficiario   Beneficiario?     @relation("TitularVinculo", fields: [titularBeneficiarioId], references: [id])
+
+  @@index([beneficiarioId, ativo])
+  @@index([grupoFamiliarId, ativo])
+  @@index([titularBeneficiarioId, ativo])
+  @@index([beneficiarioId, competenciaInicial, competenciaFinal])
+  @@map("vinculos_beneficiario")
+}
+
+model Cobranca {
+  id                    String                     @id @default(cuid())
+  empresaId             String                     @map("empresa_id")
+  apoliceId             String                     @map("apolice_id")
+  grupoFamiliarId       String                     @map("grupo_familiar_id")
+  titularResponsavelId  String                     @map("titular_responsavel_id")
+  competencia           String
+  tipoCobranca          TipoCobranca               @map("tipo_cobranca")
+  valorCustoTotal       Decimal                    @db.Decimal(12, 2) @map("valor_custo_total")
+  valorMargemTotal      Decimal                    @db.Decimal(12, 2) @map("valor_margem_total")
+  valorCotacao          Decimal                    @db.Decimal(12, 2) @map("valor_cotacao")
+  valorProRataTotal     Decimal                    @db.Decimal(12, 2) @default(0) @map("valor_pro_rata_total")
+  valorOriginal         Decimal                    @db.Decimal(12, 2) @map("valor_original")
+  valorAtual            Decimal                    @db.Decimal(12, 2) @map("valor_atual")
+  dataVencimento        DateTime                   @map("data_vencimento")
+  status                StatusCobranca
+  pagoEm                DateTime?                  @map("pago_em")
+  origemConfirmacao     String?                    @map("origem_confirmacao")
+  observacoes           String?
+  criadoEm              DateTime                   @default(now()) @map("criado_em")
+  atualizadoEm          DateTime                   @updatedAt @map("atualizado_em")
+  empresa               Empresa                    @relation(fields: [empresaId], references: [id])
+  apolice               Apolice                    @relation(fields: [apoliceId], references: [id])
+  grupoFamiliar         GrupoFamiliar              @relation(fields: [grupoFamiliarId], references: [id])
+  titularResponsavel    Beneficiario               @relation("TitularResponsavelCobranca", fields: [titularResponsavelId], references: [id])
+  itens                 ItemCobranca[]
+  movimentosCaixa       MovimentoCaixa[]
+
+  @@index([empresaId, competencia])
+  @@index([grupoFamiliarId, competencia])
+  @@index([titularResponsavelId, competencia])
+  @@unique([grupoFamiliarId, competencia, tipoCobranca])
+  @@map("cobrancas")
+}
+
+model ItemCobranca {
+  id             String          @id @default(cuid())
+  cobrancaId     String          @map("cobranca_id")
+  beneficiarioId String?         @map("beneficiario_id")
+  tipoItem       TipoItemCobranca @map("tipo_item")
+  descricao      String?
+  valorCusto     Decimal         @db.Decimal(12, 2) @default(0) @map("valor_custo")
+  valorTaxa      Decimal         @db.Decimal(12, 2) @default(0) @map("valor_taxa")
+  valorFinal     Decimal         @db.Decimal(12, 2) @map("valor_final")
+  ordemExibicao  Int             @default(0) @map("ordem_exibicao")
+  observacoes    String?
+  criadoEm       DateTime        @default(now()) @map("criado_em")
+  atualizadoEm   DateTime        @updatedAt @map("atualizado_em")
+  cobranca       Cobranca        @relation(fields: [cobrancaId], references: [id], onDelete: Cascade)
+  beneficiario   Beneficiario?   @relation(fields: [beneficiarioId], references: [id])
+
+  @@index([cobrancaId])
+  @@index([beneficiarioId])
+  @@map("itens_cobranca")
+}
+
+model FaturaTecnica {
+  id                      String                    @id @default(cuid())
+  empresaId               String                    @map("empresa_id")
+  apoliceId               String                    @map("apolice_id")
+  grupoFamiliarId         String?                   @map("grupo_familiar_id")
+  titularResponsavelId    String?                   @map("titular_responsavel_id")
+  beneficiarioId          String?                   @map("beneficiario_id")
+  planoId                 String                    @map("plano_id")
+  tipoReferencia          TipoReferenciaFaturaTecnica @map("tipo_referencia")
+  referenciaId            String                    @map("referencia_id")
+  valorOriginal           Decimal                   @db.Decimal(12, 2) @map("valor_original")
+  valorDevolvido          Decimal                   @db.Decimal(12, 2) @default(0) @map("valor_devolvido")
+  valorRepassadoCorretor  Decimal                   @db.Decimal(12, 2) @default(0) @map("valor_repassado_corretor")
+  status                  StatusFaturaTecnica
+  pagoEm                  DateTime?                 @map("pago_em")
+  aprovadoEm              DateTime?                 @map("aprovado_em")
+  implantadoEm            DateTime?                 @map("implantado_em")
+  observacoes             String?
+  criadoEm                DateTime                  @default(now()) @map("criado_em")
+  atualizadoEm            DateTime                  @updatedAt @map("atualizado_em")
+  empresa                 Empresa                   @relation(fields: [empresaId], references: [id])
+  apolice                 Apolice                   @relation(fields: [apoliceId], references: [id])
+  grupoFamiliar           GrupoFamiliar?            @relation(fields: [grupoFamiliarId], references: [id])
+  titularResponsavel      Beneficiario?             @relation("TitularResponsavelFaturaTecnica", fields: [titularResponsavelId], references: [id])
+  beneficiario            Beneficiario?             @relation("BeneficiarioFaturaTecnica", fields: [beneficiarioId], references: [id])
+  plano                   Plano                     @relation(fields: [planoId], references: [id])
+  movimentosCaixa         MovimentoCaixa[]
+
+  @@index([apoliceId, status])
+  @@index([grupoFamiliarId])
+  @@index([beneficiarioId])
+  @@map("faturas_tecnicas")
+}
+
+model CaixaEmergencia {
+  id               String           @id @default(cuid())
+  apoliceId        String           @unique @map("apolice_id")
+  valorTotal       Decimal          @db.Decimal(12, 2) @default(0) @map("valor_total")
+  valorDisponivel  Decimal          @db.Decimal(12, 2) @default(0) @map("valor_disponivel")
+  valorUtilizado   Decimal          @db.Decimal(12, 2) @default(0) @map("valor_utilizado")
+  valorComprometido Decimal         @db.Decimal(12, 2) @default(0) @map("valor_comprometido")
+  nivelRisco       NivelRisco?      @map("nivel_risco")
+  criadoEm         DateTime         @default(now()) @map("criado_em")
+  atualizadoEm     DateTime         @updatedAt @map("atualizado_em")
+  apolice          Apolice          @relation(fields: [apoliceId], references: [id])
+
+  @@map("caixas_emergencia")
+}
+
+model MovimentoCaixa {
+  id                String               @id @default(cuid())
+  apoliceId         String               @map("apolice_id")
+  grupoFamiliarId   String?              @map("grupo_familiar_id")
+  beneficiarioId    String?              @map("beneficiario_id")
+  faturaTecnicaId   String?              @map("fatura_tecnica_id")
+  cobrancaId        String?              @map("cobranca_id")
+  competencia       String?
+  tipoMovimento     TipoMovimentoCaixa   @map("tipo_movimento")
+  valor             Decimal              @db.Decimal(12, 2)
+  motivo            String?
+  criadoPorUsuarioId String?             @map("criado_por_usuario_id")
+  criadoEm          DateTime             @default(now()) @map("criado_em")
+  apolice           Apolice              @relation(fields: [apoliceId], references: [id])
+  grupoFamiliar     GrupoFamiliar?       @relation(fields: [grupoFamiliarId], references: [id])
+  beneficiario      Beneficiario?        @relation(fields: [beneficiarioId], references: [id])
+  faturaTecnica     FaturaTecnica?       @relation(fields: [faturaTecnicaId], references: [id])
+  cobranca          Cobranca?            @relation(fields: [cobrancaId], references: [id])
+
+  @@index([apoliceId, criadoEm])
+  @@index([grupoFamiliarId, competencia])
+  @@map("movimentos_caixa")
+}
+
+model EventoAuditavel {
+  id                String   @id @default(cuid())
+  tipoEntidade      String   @map("tipo_entidade")
+  entidadeId        String   @map("entidade_id")
+  tipoEvento        String   @map("tipo_evento")
+  competencia       String?
+  antesJson         Json?    @map("antes_json")
+  depoisJson        Json?    @map("depois_json")
+  motivo            String?
+  criadoPorUsuarioId String? @map("criado_por_usuario_id")
+  criadoEm          DateTime @default(now()) @map("criado_em")
+
+  @@index([tipoEntidade, entidadeId, criadoEm])
+  @@map("eventos_auditaveis")
+}

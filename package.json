@@ -1,0 +1,23 @@
+{
+  "name": "apolia",
+  "private": true,
+  "version": "0.1.0",
+  "packageManager": "bun@1.2.0",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "check": "turbo check",
+    "lint": "turbo lint",
+    "typecheck": "turbo typecheck",
+    "dev:web": "bun --filter @apolia/web dev",
+    "dev:api": "bun --filter @apolia/api dev"
+  },
+  "devDependencies": {
+    "turbo": "^2.5.0",
+    "typescript": "^5.8.0"
+  }
+}
