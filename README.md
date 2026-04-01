@@ -62,19 +62,19 @@ Direção atual da stack:
 
 Leitura humana recomendada:
 
-- [docs/70-guia-humano-do-produto.md](/C:/Users/Rafa/code/projects/health-plan-admin/docs/70-guia-humano-do-produto.md)
-- [docs/71-guia-humano-do-dominio.md](/C:/Users/Rafa/code/projects/health-plan-admin/docs/71-guia-humano-do-dominio.md)
-- [docs/72-guia-humano-da-operacao-financeira.md](/C:/Users/Rafa/code/projects/health-plan-admin/docs/72-guia-humano-da-operacao-financeira.md)
-- [docs/73-guia-humano-de-estados-e-eventos.md](/C:/Users/Rafa/code/projects/health-plan-admin/docs/73-guia-humano-de-estados-e-eventos.md)
-- [docs/74-modelo-conceitual-humano.md](/C:/Users/Rafa/code/projects/health-plan-admin/docs/74-modelo-conceitual-humano.md)
-- [docs/75-modelo-logico-inicial.md](/C:/Users/Rafa/code/projects/health-plan-admin/docs/75-modelo-logico-inicial.md)
-- [docs/76-analise-da-stack-e-monorepo.md](/C:/Users/Rafa/code/projects/health-plan-admin/docs/76-analise-da-stack-e-monorepo.md)
-- [docs/77-desenho-inicial-do-monorepo.md](/C:/Users/Rafa/code/projects/health-plan-admin/docs/77-desenho-inicial-do-monorepo.md)
-- [docs/78-revisao-da-milestone-0.md](/C:/Users/Rafa/code/projects/health-plan-admin/docs/78-revisao-da-milestone-0.md)
+- [docs/70-guia-humano-do-produto.md](docs/70-guia-humano-do-produto.md)
+- [docs/71-guia-humano-do-dominio.md](docs/71-guia-humano-do-dominio.md)
+- [docs/72-guia-humano-da-operacao-financeira.md](docs/72-guia-humano-da-operacao-financeira.md)
+- [docs/73-guia-humano-de-estados-e-eventos.md](docs/73-guia-humano-de-estados-e-eventos.md)
+- [docs/74-modelo-conceitual-humano.md](docs/74-modelo-conceitual-humano.md)
+- [docs/75-modelo-logico-inicial.md](docs/75-modelo-logico-inicial.md)
+- [docs/76-analise-da-stack-e-monorepo.md](docs/76-analise-da-stack-e-monorepo.md)
+- [docs/77-desenho-inicial-do-monorepo.md](docs/77-desenho-inicial-do-monorepo.md)
+- [docs/78-revisao-da-milestone-0.md](docs/78-revisao-da-milestone-0.md)
 
 Índice geral:
 
-- [docs/README.md](/C:/Users/Rafa/code/projects/health-plan-admin/docs/README.md)
+- [docs/README.md](docs/README.md)
 
 ## Roadmap atual
 
@@ -99,6 +99,6 @@ O próximo passo recomendado é transformar a fundação atual em base executáv
 
 ## Observações
 
-- O nome técnico antigo do diretório ainda é `health-plan-admin`, mas o nome do produto é `Apolia`.
+- O nome atual do produto e do repositório é `Apolia`.
 - Este repositório foi inicializado em `main`.
 - Remote configurado: `origin -> https://github.com/rafa3lPinheiro/apolia.git`
