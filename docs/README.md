@@ -58,6 +58,7 @@ Ordem recomendada de leitura:
 45. `63-regra-derivacao-de-risco.md`
 46. `64-regra-mvp-risco.md`
 47. `90-duvidas-abertas.md`
+48. `99-memorias-consolidadas-do-projeto.md`
 
 Leitura humana recomendada:
 
@@ -82,3 +83,4 @@ Leituras por intencao:
 - stack e monorepo: `76-analise-da-stack-e-monorepo.md`
 - desenho do monorepo: `77-desenho-inicial-do-monorepo.md`
 - revisao da milestone 0: `78-revisao-da-milestone-0.md`
+- inventario historico de memorias recuperadas: `99-memorias-consolidadas-do-projeto.md`

@@ -15,6 +15,7 @@ Pontos fortes:
 - linguagem simples e controlada
 - boa separacao inicial entre visao, entidades, regras e principios
 - ordem numerica previsivel
+- a arvore principal ja cobre produto, dominio, cobranca, reserva, risco, tecnico e leitura humana
 
 Pontos a melhorar:
 
@@ -244,5 +245,17 @@ Em vez de reorganizar tudo de uma vez:
 3. preencher notas vazias
 4. adicionar bloco de encadeamento e status nas notas mais centrais
 5. so depois renomear ou mover arquivos se ainda fizer sentido
+
+## Regra de fonte de verdade
+
+As notas numeradas da raiz de `docs` sao a fonte principal de verdade do projeto.
+
+Memorias recuperadas do MCP podem ser consolidadas localmente para auditoria ou migracao de contexto, mas nao devem criar uma estrutura paralela nem substituir as notas numeradas como referencia principal.
+
+Quando uma memoria trouxer regra nova ou detalhe ausente:
+
+- atualizar a nota numerada correta
+- registrar a memoria consolidada apenas como inventario historico, se isso ajudar rastreabilidade
+- evitar duplicar a mesma regra em duas arvores documentais
 
 Esse caminho preserva a documentacao atual e melhora navegacao sem custo alto.
